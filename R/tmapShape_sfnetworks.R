@@ -7,7 +7,7 @@
 #' @return list used by tmap internally
 #' @keywords internal
 #' @export
-tmapGetShapeMeta1.sfnetwork = function(shp, o) {
+tmapGetShapeMeta1.sfnetwork = function(shp, layer, o) {
 	# get variable names
 	# (only relevant for stars:) get dimension names and values (that can serve as variables)
 	
@@ -95,7 +95,7 @@ tmapGetShapeMeta2.sfnetwork = function(shp, smeta, o) {
 #' @keywords internal
 #' @return list used by tmap internally
 #' @export
-tmapShape.sfnetwork = function(shp, is.main, crs, bbox, unit, filter, shp_name, smeta, o, tmf) {
+tmapShape.sfnetwork = function(shp, is.main, crs, bbox, unit, filter, layer, shp_name, smeta, o, tmf) {
 	tmapID__ = NULL
 
 	# the main method to process spatial objects
@@ -112,13 +112,13 @@ tmapShape.sfnetwork = function(shp, is.main, crs, bbox, unit, filter, shp_name, 
 	
 	# for sfnetwork: the current rudimentary approach is to make one large sf object from nodes and edges, so basically a geometry collection with points and lines.
 	
+	shp = sfnetworks::to_spatial_explicit(shp)[[1]]
 	
 	
 	if (!is.null(crs) && sf::st_crs(shp) != crs) {
 		shp = sf::st_transform(shp, crs = crs)
 	}
 	
-	shp = sfnetworks::to_spatial_explicit(shp)[[1]]
 	
 	nodes = sf::st_as_sf(shp, "nodes")
 	edges = sf::st_as_sf(shp, "edges")
@@ -159,7 +159,11 @@ tmapShape.sfnetwork = function(shp, is.main, crs, bbox, unit, filter, shp_name, 
 	
 	tmap::make_by_vars(dt, tmf, smeta)
 
+
+	type_ids = list(symbols = dt_nodes$tmapID__, lines = dt_edges$tmapID__)
+	type_vars = list(symbols = names(dt_nodes), lines = names(dt_edges))
+	
 	shpTM = shapeTM(shp = sfc, tmapID = 1L:(length(sfc)), bbox = bbox)
-	structure(list(shpTM = shpTM, dt = dt, is.main = is.main, dtcols = dtcols, shpclass = "sfc", bbox = bbox, unit = unit, shp_name = shp_name, smeta = smeta), class = "tmapShape")
+	structure(list(shpTM = shpTM, dt = dt, is.main = is.main, dtcols = dtcols, shpclass = "sfc", bbox = bbox, unit = unit, shp_name = shp_name, smeta = smeta, type_ids = type_ids, type_vars = type_vars), class = "tmapShape")
 }
 

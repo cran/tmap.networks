@@ -6,6 +6,7 @@
 #' @param lwd,lwd.scale,lwd.legend,lwd.free Visual variable that determines the line width. See details.
 #' @param lty,lty.scale,lty.legend,lty.free Visual variable that determines the line type. See details.
 #' @param col_alpha,col_alpha.scale,col_alpha.legend,col_alpha.free Visual variable that determines the border color alpha transparency. See details.
+#' @param from,to Numbers between 0 and 1 (where `to >= from`) that indicate which part of each edge is drawn. By default full lines, so `from` and `to` are respectively 0 and 1.
 #' @param linejoin,lineend line join and line end. See \code{\link[grid:gpar]{gpar}} for details.
 #' @param plot.order Specification in which order the spatial features are drawn. See `tmap::tm_plot_order` for details.
 #' @param options options passed on to the corresponding `opt_<layer_function>` function
@@ -28,6 +29,7 @@
 #' @param id name of the data variable that specifies the indices of the spatial
 #'   features. Only used for `"view"` mode.
 #' @export
+#' @importFrom lwgeom st_linesubstring
 #' @return a [tmap::tmap-element], supposed to be stacked after [tmap::tm_shape()] using the `+` operator. The `opt_<layer_function>` function returns a list that should be passed on to the `options` argument.
 #' @example ./examples/tm_network.R
 tm_edges = function(col = tmap::tm_const(),
@@ -46,6 +48,8 @@ tm_edges = function(col = tmap::tm_const(),
 					col_alpha.scale = tmap::tm_scale(),
 					col_alpha.legend = tmap::tm_legend(),
 					col_alpha.free = NA,
+					from = 0,
+					to = 1,
 					linejoin = "round",
 					lineend = "round",
 					plot.order = tmap::tm_plot_order("lwd", reverse = TRUE, na.order = "bottom"),
@@ -74,14 +78,16 @@ tm_edges = function(col = tmap::tm_const(),
 				  hover = hover,
 				  id = id)
 
+	tm[[1]]$mapping.args = c(tm[[1]]$mapping.args, list(from = from, to = to))
 	tm[[1]]$layer = c("edges", "lines")
 	tm
 }
 
 #' @rdname tm_edges
 #' @param lines.only should only line geometries of the shape object (defined in [tmap::tm_shape()]) be plotted, or also other geometry types (like polygons)? By default `"ifany"`, which means `TRUE` in case a geometry collection is specified.
+#' @param offset_start,offset_end Offset in coordinates (usually meters) of the start and end points.
 #' @export
-opt_tm_edges = function(lines.only = "ifany") {
+opt_tm_edges = function(lines.only = "yes", offset_start = 0, offset_end = 0) {
 	list(trans.args = list(lines.only = lines.only),
-		 mapping.args = list())
+		 mapping.args = list(offset_start = offset_start, offset_end = offset_end))
 }

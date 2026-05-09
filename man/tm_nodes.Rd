@@ -50,9 +50,10 @@ tm_nodes(
 )
 
 opt_tm_nodes(
-  points_only = "ifany",
+  points_only = "yes",
   point_per = "feature",
   on_surface = FALSE,
+  clustering = FALSE,
   icon.scale = 3,
   just = NA,
   grob.dim = c(width = 48, height = 48, render.width = 256, render.height = 256)
@@ -110,6 +111,8 @@ features. Only used for `"view"` mode.}
 
 \item{on_surface}{In case of polygons, centroids are computed. Should the points be on the surface? If `TRUE`, which is slower than the default `FALSE`, centroids outside the surface are replaced with points computed with [sf::st_point_on_surface()].}
 
+\item{clustering}{in interactive modes (e.g. \code{"view"} mode), should clustering be applied at lower zoom levels? Either `FALSE` (default), `TRUE`, or a mode specific specification, e.g. for \code{"view"} mode \code{\link[leaflet:markerClusterOptions]{markerClusterOptions}}.}
+
 \item{icon.scale}{scaling number that determines how large the icons (or grobs) are in plot mode in comparison to proportional symbols (such as bubbles). For view mode, use the argument `grob.dim`}
 
 \item{just}{not used (yet)}
@@ -133,5 +136,10 @@ tm_shape(sfn) +
 	
 tm_shape(sfn) +
 	tm_edges(col = "type", lwd = 4) +
+	tm_nodes()
+
+
+tm_shape(sfn) +
+	tm_edges(col = "type", lwd = 4, from = 0.3, to = 0.4) +
 	tm_nodes()
 }
